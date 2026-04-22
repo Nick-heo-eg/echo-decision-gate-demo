@@ -211,6 +211,7 @@ DEMO_CASES = {
     "⛔ Case 1 — Partial delivery: penalty clause blocks acceptance": {
         "title": "Partial Delivery Acceptance",
         "subtitle": "Supplier 12 days late. Offering partial shipment. Penalty clause active.",
+        "hook": "$10,000 penalty right forfeited in one click. Accepting partial delivery without a written waiver silently kills the claim.",
         "narrative": "Your supplier is 12 days late and just offered to ship 60% of the order now, the rest next week. Your manager wants to accept and move on. The gate runs before you click Accept.",
         "action_label": "✅  Accept Partial Delivery",
         "domain": "procurement",
@@ -316,6 +317,7 @@ DEMO_CASES = {
     "✅ Case 2 — Unpaid invoice: contract active, claim clear": {
         "title": "Unpaid Invoice — Demand Letter",
         "subtitle": "Buyer 60 days overdue on $45,000 invoice. Contract in force. No dispute raised.",
+        "hook": "Contract active. 60 days overdue. No dispute raised. The claim is clear — the gate confirms it before you send.",
         "narrative": "A buyer hasn't paid a $45,000 invoice in 60 days. No dispute was raised, no payment plan requested. You want to issue a formal demand letter. The gate checks whether your claim is legally solid before you send.",
         "action_label": "📨  Issue Demand Letter",
         "domain": "procurement",
@@ -355,7 +357,8 @@ DEMO_CASES = {
     "🔀 Case 3 — Component swap: pin map unconfirmed → execution blocked": {
         "title": "IC Component Replacement — Production Gate",
         "subtitle": "Replacement IC sourced. Pin map not confirmed by engineering. Production about to proceed.",
-        "narrative": "Procurement sourced a replacement IC due to shortage. Someone on the team called the supplier, checked a box in the spreadsheet marked 'confirmed', and production is scheduled for today. This exact sequence caused a $20,000 rework incident (INC-001). The gate runs before the line starts.",
+        "hook": "$20,000 loss. Procurement signed off on an engineering decision. Not a data problem — an authority problem. HOLD wouldn't have caught it. REDIRECT does.",
+        "narrative": "Procurement sourced a replacement IC due to shortage. Someone on the team called the supplier, checked a box in the spreadsheet marked 'confirmed', and production is scheduled for today. This exact sequence caused a $20,000 rework incident. The gate runs before the line starts.",
         "action_label": "🏭  Proceed to Production",
         "domain": "fourm",
         "fourm_type": "M1_material",
@@ -459,6 +462,7 @@ DEMO_CASES = {
     "📧 Case 4 — Email draft: clause conflict blocks send": {
         "title": "Pre-Send Contract Gate",
         "subtitle": "Email draft accepts partial delivery and waives further claims. Contract has liability cap + no-waiver clause.",
+        "hook": "Two phrases in a casual reply just forfeited $10,000 in penalty rights. The gate catches it before it leaves the outbox.",
         "narrative": "You wrote a quick reply to close out a supplier dispute — friendly tone, accepting the partial shipment, saying 'no further claims.' The gate intercepts it before it leaves your outbox and flags two phrases that would forfeit $10,000 in penalty rights.",
         "action_label": "📤  Send Email",
         "domain": "send_gate",
@@ -717,21 +721,20 @@ st.markdown(
     'If we block it, we assign it.</div>',
     unsafe_allow_html=True,
 )
-st.markdown(
-    '<div class="hook">'
-    '<b>Case 3:</b> $20,000 loss. Procurement signed off on an engineering decision. '
-    'Not a data problem — an authority problem. '
-    'HOLD wouldn\'t have caught it. <b>REDIRECT does.</b>'
-    '</div>',
-    unsafe_allow_html=True,
-)
-
-st.divider()
-
 # case selector — default to Case 3 (REDIRECT, the novel state)
 _case_keys = list(DEMO_CASES.keys())
 _default_idx = next((i for i, k in enumerate(_case_keys) if "Case 3" in k), 0)
 selected = st.selectbox("**Select a case**", _case_keys, index=_default_idx)
+
+# hook banner — driven by selected case
+_hook_text = (DEMO_CASES.get(selected) or {}).get("hook", "")
+if _hook_text:
+    st.markdown(
+        f'<div class="hook">{_hook_text}</div>',
+        unsafe_allow_html=True,
+    )
+
+st.divider()
 cfg = DEMO_CASES[selected]
 
 if cfg is None:
