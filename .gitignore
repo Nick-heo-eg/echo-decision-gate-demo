@@ -1,0 +1,21 @@
+# ── internal — never publish ──────────────────────────────────────────────────
+verticals/
+scripts/
+notes/
+*.jsonl
+*.json
+*.csv
+*.log
+.env
+*.local.*
+
+# ── python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# ── allowed (allowlist approach: everything above is blocked) ─────────────────
+# app.py
+# requirements.txt
+# assets/          (if added later)
