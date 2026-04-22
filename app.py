@@ -211,6 +211,7 @@ DEMO_CASES = {
     "⛔ Case 1 — Partial delivery: penalty clause blocks acceptance": {
         "title": "Partial Delivery Acceptance",
         "subtitle": "Supplier 12 days late. Offering partial shipment. Penalty clause active.",
+        "narrative": "Your supplier is 12 days late and just offered to ship 60% of the order now, the rest next week. Your manager wants to accept and move on. The gate runs before you click Accept.",
         "action_label": "✅  Accept Partial Delivery",
         "domain": "procurement",
         "dispute_type": "delivery_delay",
@@ -315,6 +316,7 @@ DEMO_CASES = {
     "✅ Case 2 — Unpaid invoice: contract active, claim clear": {
         "title": "Unpaid Invoice — Demand Letter",
         "subtitle": "Buyer 60 days overdue on $45,000 invoice. Contract in force. No dispute raised.",
+        "narrative": "A buyer hasn't paid a $45,000 invoice in 60 days. No dispute was raised, no payment plan requested. You want to issue a formal demand letter. The gate checks whether your claim is legally solid before you send.",
         "action_label": "📨  Issue Demand Letter",
         "domain": "procurement",
         "dispute_type": "payment",
@@ -353,6 +355,7 @@ DEMO_CASES = {
     "🔀 Case 3 — Component swap: pin map unconfirmed → execution blocked": {
         "title": "IC Component Replacement — Production Gate",
         "subtitle": "Replacement IC sourced. Pin map not confirmed by engineering. Production about to proceed.",
+        "narrative": "Procurement sourced a replacement IC due to shortage. Someone on the team called the supplier, checked a box in the spreadsheet marked 'confirmed', and production is scheduled for today. This exact sequence caused a $20,000 rework incident (INC-001). The gate runs before the line starts.",
         "action_label": "🏭  Proceed to Production",
         "domain": "fourm",
         "fourm_type": "M1_material",
@@ -456,6 +459,7 @@ DEMO_CASES = {
     "📧 Case 4 — Email draft: clause conflict blocks send": {
         "title": "Pre-Send Contract Gate",
         "subtitle": "Email draft accepts partial delivery and waives further claims. Contract has liability cap + no-waiver clause.",
+        "narrative": "You wrote a quick reply to close out a supplier dispute — friendly tone, accepting the partial shipment, saying 'no further claims.' The gate intercepts it before it leaves your outbox and flags two phrases that would forfeit $10,000 in penalty rights.",
         "action_label": "📤  Send Email",
         "domain": "send_gate",
         "contract_clauses": [
@@ -774,6 +778,16 @@ with left:
     st.markdown(f"### {cfg['title']}")
     st.caption(cfg["subtitle"])
 
+    # narrative — situation in plain language
+    if cfg.get("narrative"):
+        st.markdown(
+            f'<div style="background:rgba(125,157,196,0.08);border-left:2px solid #7d9dc4;'
+            f'padding:12px 16px;margin:10px 0 18px 0;font-size:0.9rem;color:#b5aea1;'
+            f'line-height:1.6;font-family:\'Fraunces\',serif">'
+            f'{cfg["narrative"]}</div>',
+            unsafe_allow_html=True,
+        )
+
     # contract clauses
     if cfg.get("contract_clauses"):
         st.markdown("**Contract / Policy on record**")
@@ -810,6 +824,13 @@ with left:
                 dv = f"`{val:,}`" if isinstance(val,int) else f"`${val:,.0f}`"
             md += f"| {lbl} | {dv} |\n"
         st.markdown(md)
+
+    # raw input JSON (collapsed by default)
+    _skip_json = {"title","subtitle","narrative","domain","contract_clauses","gate_override",
+                  "email_draft","incident","loss_amount","user_verdict_live"}
+    _raw_input = {k: v for k, v in cfg.items() if k not in _skip_json and v is not None}
+    with st.expander("{ } Raw input passed to gate", expanded=False):
+        st.code(json.dumps(_raw_input, indent=2, ensure_ascii=False), language="json")
 
     if cfg.get("incident"):
         st.error(f"⚠️ Incident on record: **{cfg['incident']}** — Loss: {cfg.get('loss_amount','')}")
