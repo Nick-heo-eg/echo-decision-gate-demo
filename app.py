@@ -18,22 +18,185 @@ st.set_page_config(
 )
 
 st.markdown("""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&family=JetBrains+Mono:wght@400;600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+""", unsafe_allow_html=True)
+
+st.markdown("""
 <style>
-  .gate-allow    { background:#1b5e20; color:#fff; padding:14px 22px; border-radius:8px; font-size:1.4rem; font-weight:700; letter-spacing:.5px; }
-  .gate-hold     { background:#b71c1c; color:#fff; padding:14px 22px; border-radius:8px; font-size:1.4rem; font-weight:700; letter-spacing:.5px; }
-  .gate-redirect { background:#4a148c; color:#fff; padding:14px 22px; border-radius:8px; font-size:1.4rem; font-weight:700; letter-spacing:.5px; }
-  .ev-row        { border-left:3px solid #9e9e9e; background:#f5f5f5; padding:7px 12px; margin:3px 0; font-size:0.88rem; border-radius:0 4px 4px 0; }
-  .ev-pos        { border-color:#2e7d32; background:#f1f8f1; }
-  .ev-neg        { border-color:#c62828; background:#fdf1f1; }
-  .ev-neutral    { border-color:#e65100; background:#fff8f0; }
-  .clause-box    { background:#1a237e; color:#e8eaf6; padding:10px 16px; border-radius:6px; font-family:monospace; font-size:0.85rem; margin:8px 0; }
-  .hook          { background:#e65100; color:#fff; padding:10px 16px; border-radius:6px; font-size:0.92rem; margin-bottom:12px; }
-  .impact-box    { background:#212121; color:#fff; padding:10px 16px; border-radius:6px; font-size:0.9rem; margin:8px 0; }
-  .step          { font-size:0.72rem; color:#888; text-transform:uppercase; letter-spacing:1.2px; margin-bottom:2px; }
-  .locked-btn    { background:#616161 !important; color:#bdbdbd !important; cursor:not-allowed !important;
-                   padding:10px 20px; border-radius:6px; font-weight:700; font-size:0.95rem; border:none; width:100%; }
-  .execute-btn   { background:#2e7d32; color:#fff; padding:10px 20px; border-radius:6px;
-                   font-weight:700; font-size:0.95rem; border:none; width:100%; cursor:pointer; }
+  /* ── Design tokens ──────────────────────────────────────────────── */
+  :root {
+    --bg:            #0b0a08;
+    --bg-elev-1:     #141210;
+    --bg-elev-2:     #1b1815;
+    --surface-soft:  #1f1c18;
+    --ink:           #f4efe3;
+    --ink-dim:       #b5aea1;
+    --ink-mute:      #7a7367;
+    --gold:          #d4a853;
+    --terracotta:    #c17458;
+    --sage:          #7a9970;
+    --slate:         #7d9dc4;
+    --rule:          #2a2620;
+    --rule-strong:   #3a342c;
+  }
+
+  /* ── Gate verdict cards (left-border style) ─────────────────────── */
+  .gate-allow {
+    background: rgba(122,153,112,0.12);
+    border-left: 3px solid #7a9970;
+    color: #f4efe3;
+    padding: 14px 22px;
+    border-radius: 0 8px 8px 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    font-family: 'Fraunces', serif;
+  }
+  .gate-hold {
+    background: rgba(212,168,83,0.12);
+    border-left: 3px solid #d4a853;
+    color: #f4efe3;
+    padding: 14px 22px;
+    border-radius: 0 8px 8px 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    font-family: 'Fraunces', serif;
+  }
+  .gate-redirect {
+    background: rgba(193,116,88,0.12);
+    border-left: 3px solid #c17458;
+    color: #f4efe3;
+    padding: 14px 22px;
+    border-radius: 0 8px 8px 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    font-family: 'Fraunces', serif;
+  }
+
+  /* ── Evidence rows ──────────────────────────────────────────────── */
+  .ev-row {
+    border-left: 3px solid #3a342c;
+    background: #1b1815;
+    color: #b5aea1;
+    padding: 7px 12px;
+    margin: 3px 0;
+    font-size: 0.88rem;
+    border-radius: 0 4px 4px 0;
+    font-family: 'Public Sans', sans-serif;
+  }
+  .ev-pos     { border-color: #7a9970; background: rgba(122,153,112,0.10); color: #f4efe3; }
+  .ev-neg     { border-color: #c17458; background: rgba(193,116,88,0.10);  color: #f4efe3; }
+  .ev-neutral { border-color: #d4a853; background: rgba(212,168,83,0.10);  color: #f4efe3; }
+
+  /* ── Clause box ─────────────────────────────────────────────────── */
+  .clause-box {
+    background: #1f1c18;
+    color: #b5aea1;
+    border-left: 2px solid #7d9dc4;
+    padding: 10px 16px;
+    border-radius: 0 6px 6px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    margin: 8px 0;
+  }
+  .clause-box b {
+    color: #7d9dc4;
+  }
+
+  /* ── Hook / banner ──────────────────────────────────────────────── */
+  .hook {
+    background: rgba(193,116,88,0.14);
+    border-left: 3px solid #c17458;
+    color: #f4efe3;
+    padding: 10px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.92rem;
+    font-family: 'Fraunces', serif;
+    margin-bottom: 12px;
+  }
+
+  /* ── Impact box ─────────────────────────────────────────────────── */
+  .impact-box {
+    background: #1f1c18;
+    border-left: 3px solid #d4a853;
+    color: #b5aea1;
+    padding: 10px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.9rem;
+    margin: 8px 0;
+  }
+  .impact-box b { color: #d4a853; }
+
+  /* ── Step label ─────────────────────────────────────────────────── */
+  .step {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: #7a7367;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 2px;
+  }
+
+  /* ── Owner badge ────────────────────────────────────────────────── */
+  .owner-badge-hold {
+    background: rgba(212,168,83,0.18);
+    color: #d4a853;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .owner-badge-redirect {
+    background: rgba(193,116,88,0.18);
+    color: #c17458;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .owner-badge-allow {
+    background: rgba(122,153,112,0.18);
+    color: #7a9970;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Locked button ──────────────────────────────────────────────── */
+  .locked-btn {
+    background: #1f1c18 !important;
+    color: #7a7367 !important;
+    cursor: not-allowed !important;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: none;
+    width: 100%;
+  }
+  .execute-btn {
+    background: rgba(122,153,112,0.20);
+    border-left: 3px solid #7a9970;
+    color: #f4efe3;
+    padding: 10px 20px;
+    border-radius: 0 6px 6px 0;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+  }
 </style>
 """, unsafe_allow_html=True)
 
@@ -590,7 +753,7 @@ for col,label,body in [
     col.markdown(f'<div class="step">{label}</div>', unsafe_allow_html=True)
     col.markdown(body)
 for col in [c2,c4,c6]:
-    col.markdown('<div style="font-size:1.5rem;color:#888;margin-top:20px;text-align:center">→</div>', unsafe_allow_html=True)
+    col.markdown('<div style="font-size:1.5rem;color:#7a7367;margin-top:20px;text-align:center">→</div>', unsafe_allow_html=True)
 
 st.divider()
 
@@ -683,10 +846,17 @@ with right:
 
     # ── 1. PRIMARY VERDICT: user language ──────────────────────────────────────
     if user_verdict:
-        verdict_bg = {"HOLD":"#b71c1c","REDIRECT_DEV":"#4a148c","ALLOW":"#1b5e20"}.get(decision,"#333")
-        sub_html = f'<div style="font-size:0.9rem;margin-top:6px;opacity:.85">{user_sub}</div>' if user_sub else ""
+        _vdict = {
+            "HOLD":         ("rgba(212,168,83,0.13)",  "#d4a853"),
+            "REDIRECT_DEV": ("rgba(193,116,88,0.13)",  "#c17458"),
+            "ALLOW":        ("rgba(122,153,112,0.13)", "#7a9970"),
+        }
+        verdict_bg, verdict_border = _vdict.get(decision, ("#1f1c18", "#3a342c"))
+        sub_html = f'<div style="font-size:0.9rem;margin-top:6px;color:#b5aea1">{user_sub}</div>' if user_sub else ""
         st.markdown(
-            f'<div style="background:{verdict_bg};color:#fff;padding:16px 20px;border-radius:8px;margin-bottom:8px">'
+            f'<div style="background:{verdict_bg};border-left:3px solid {verdict_border};'
+            f'color:#f4efe3;padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:8px;'
+            f'font-family:\'Fraunces\',serif">'
             f'<div style="font-size:1.3rem;font-weight:700">{user_verdict}</div>{sub_html}</div>',
             unsafe_allow_html=True,
         )
@@ -701,25 +871,25 @@ with right:
     if not _owner_cfg and decision == "ALLOW":
         _owner_cfg = {"role": "System Approved", "action": "Gate passed — execution authorized"}
     if _owner_cfg:
-        _owner_color = {
-            "HOLD":        "#7f0000",
-            "REDIRECT_DEV":"#1a0050",
-            "ALLOW":       "#1b5e20",
-        }.get(decision, "#333")
+        _badge_class = {
+            "HOLD":        "owner-badge-hold",
+            "REDIRECT_DEV":"owner-badge-redirect",
+            "ALLOW":       "owner-badge-allow",
+        }.get(decision, "owner-badge-hold")
         _owner_icon = {"HOLD": "👤", "REDIRECT_DEV": "🔀", "ALLOW": "✅"}.get(decision, "📌")
         _owner_why = _owner_cfg.get("why", "")
         _why_html = (
-            f'<div style="font-size:0.78rem;color:#888;margin-top:4px;padding-left:2px">'
+            f'<div style="font-size:0.78rem;color:#7a7367;margin-top:4px;padding-left:2px;'
+            f'font-family:\'JetBrains Mono\',monospace">'
             f'Why this owner: {_owner_why}</div>'
             if _owner_why else ""
         )
         st.markdown(
             f'<div style="margin:6px 0 10px 0">'
             f'<div style="display:flex;align-items:center;gap:10px">'
-            f'<div style="background:{_owner_color};color:#fff;padding:4px 12px;'
-            f'border-radius:20px;font-size:0.82rem;font-weight:600;white-space:nowrap">'
+            f'<div class="{_badge_class}">'
             f'{_owner_icon} Owner: {_owner_cfg["role"]}</div>'
-            f'<div style="font-size:0.82rem;color:#666">{_owner_cfg["action"]}</div>'
+            f'<div style="font-size:0.82rem;color:#b5aea1">{_owner_cfg["action"]}</div>'
             f'</div>{_why_html}</div>',
             unsafe_allow_html=True,
         )
@@ -764,10 +934,11 @@ with right:
             help=f"Block basis: {block_rule}",
         )
         st.markdown(
-            f'<div style="background:#b71c1c22;border:1px solid #b71c1c55;border-radius:6px;'
-            f'padding:10px 14px;margin-top:6px;font-size:0.88rem">'
+            f'<div style="background:rgba(193,116,88,0.10);border-left:3px solid #c17458;'
+            f'border-radius:0 6px 6px 0;'
+            f'padding:10px 14px;margin-top:6px;font-size:0.88rem;color:#f4efe3">'
             f'🚫 <b>Execution blocked by policy</b><br>'
-            f'<span style="color:#555">Basis: {override.get("reason", reason)[:120]}...</span>'
+            f'<span style="color:#b5aea1">Basis: {override.get("reason", reason)[:120]}...</span>'
             f'</div>',
             unsafe_allow_html=True,
         )
@@ -822,10 +993,11 @@ with right:
             _btn_style = (
                 "display:inline-block;padding:7px 16px;border-radius:6px;font-size:0.85rem;"
                 "font-weight:600;text-decoration:none;margin-right:8px;cursor:pointer;"
+                "font-family:'Public Sans',sans-serif;"
             )
             st.markdown(
-                f'<a href="{_mailto_fix}" target="_blank" style="{_btn_style}background:#1565c0;color:#fff">✉️ Draft Email — Ready to Send</a>'
-                f'<span style="font-size:0.78rem;color:#888">← content pre-filled · review before sending</span>',
+                f'<a href="{_mailto_fix}" target="_blank" style="{_btn_style}background:rgba(125,157,196,0.18);color:#7d9dc4;border:1px solid #7d9dc4">✉️ Draft Email — Ready to Send</a>'
+                f'<span style="font-size:0.78rem;color:#7a7367;font-family:\'JetBrains Mono\',monospace">← content pre-filled · review before sending</span>',
                 unsafe_allow_html=True,
             )
             st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
@@ -834,17 +1006,19 @@ with right:
             diff_lines = fix_action.get("diff", [])
             if diff_lines:
                 with st.expander("Changes (before / after)", expanded=True):
-                    diff_colors = {"add": "#1b5e20", "del": "#b71c1c", "ctx": "#555"}
-                    diff_bg     = {"add": "#f1f8f1", "del": "#fdf1f1", "ctx": "#fafafa"}
+                    diff_colors = {"add": "#9cc28d", "del": "#d19682", "ctx": "#7a7367"}
+                    diff_bg     = {"add": "rgba(122,153,112,0.10)", "del": "rgba(193,116,88,0.09)", "ctx": "transparent"}
                     diff_prefix = {"add": "+ ", "del": "- ", "ctx": "  "}
+                    diff_extra  = {"del": "text-decoration:line-through;"}
                     html_rows = ""
                     for kind, line in diff_lines:
-                        prefix = diff_prefix.get(kind, "  ")
-                        color  = diff_colors.get(kind, "#333")
-                        bg     = diff_bg.get(kind, "#fff")
+                        prefix  = diff_prefix.get(kind, "  ")
+                        color   = diff_colors.get(kind, "#b5aea1")
+                        bg      = diff_bg.get(kind, "transparent")
+                        extra   = diff_extra.get(kind, "")
                         html_rows += (
-                            f'<div style="background:{bg};color:{color};font-family:monospace;'
-                            f'font-size:0.83rem;padding:2px 10px;border-radius:2px">'
+                            f'<div style="background:{bg};color:{color};font-family:\'JetBrains Mono\',monospace;'
+                            f'font-size:0.83rem;padding:2px 10px;border-radius:2px;{extra}">'
                             f'{prefix}{line}</div>'
                         )
                     st.markdown(html_rows, unsafe_allow_html=True)
@@ -865,8 +1039,8 @@ with right:
                 + "&body=" + _up.quote(_route_body)
             )
             st.markdown(
-                f'<a href="{_mailto_route}" target="_blank" style="{_btn_style}background:#4a148c;color:#fff">✉️ Prepare Handoff Email</a>'
-                f'<span style="font-size:0.78rem;color:#888">← recipient + content pre-filled · review before sending</span>',
+                f'<a href="{_mailto_route}" target="_blank" style="{_btn_style}background:rgba(193,116,88,0.18);color:#c17458;border:1px solid #c17458">✉️ Prepare Handoff Email</a>'
+                f'<span style="font-size:0.78rem;color:#7a7367;font-family:\'JetBrains Mono\',monospace">← recipient + content pre-filled · review before sending</span>',
                 unsafe_allow_html=True,
             )
 
@@ -875,10 +1049,11 @@ with right:
     # ── 7. Internal reasoning (collapsible for developers/HN) ──────────────────────────────
     with st.expander("🔧 View Internal Reasoning (Engine / Evidence Chain)", expanded=False):
         st.markdown(
-            '<div style="background:#e8eaf6;border-left:3px solid #3949ab;padding:7px 12px;'
-            'border-radius:0 4px 4px 0;font-size:0.82rem;margin-bottom:12px">'
-            '⚙️ <b>Judgment is deterministic</b> (rule-based clause matching — no LLM in the decision path). '
-            '<b>Drafted outputs are AI-assisted</b> (editable before sending).'
+            '<div style="background:#1f1c18;border-left:3px solid #7d9dc4;padding:7px 12px;'
+            'border-radius:0 4px 4px 0;font-size:0.82rem;margin-bottom:12px;color:#b5aea1;'
+            'font-family:\'Public Sans\',sans-serif">'
+            '⚙️ <b style="color:#f4efe3">Judgment is deterministic</b> (rule-based clause matching — no LLM in the decision path). '
+            '<b style="color:#f4efe3">Drafted outputs are AI-assisted</b> (editable before sending).'
             '</div>',
             unsafe_allow_html=True,
         )
@@ -909,9 +1084,11 @@ with right:
             _title_why, _body_why = _generic_why.get(decision, _default)
 
         st.markdown(
-            f'<div style="border-left:3px solid #555;padding:8px 12px;background:#f5f5f5;border-radius:0 4px 4px 0;margin-bottom:8px">'
-            f'<b>{_title_why}</b><br>'
-            f'<span style="font-size:0.85rem;color:#444">{_body_why}</span></div>',
+            f'<div style="border-left:3px solid #3a342c;padding:8px 12px;background:#1b1815;'
+            f'border-radius:0 4px 4px 0;margin-bottom:8px;color:#f4efe3;'
+            f'font-family:\'Public Sans\',sans-serif">'
+            f'<b style="font-family:\'Fraunces\',serif">{_title_why}</b><br>'
+            f'<span style="font-size:0.85rem;color:#b5aea1">{_body_why}</span></div>',
             unsafe_allow_html=True,
         )
 
@@ -946,9 +1123,9 @@ with right:
 # ─────────────────────────────────────────────────────────────────────────────
 st.divider()
 st.markdown("""
-<div style="font-size:0.78rem;color:#888;text-align:center">
+<div style="font-size:0.78rem;color:#7a7367;text-align:center;font-family:'JetBrains Mono',monospace">
   Echo Decision Gate · rule engine + evidence chain + execution lock<br>
   Verticals: procurement · 4M manufacturing change control · contract enforcement · pre-send gate<br>
-  <b>The gate doesn't advise. It decides — and blocks.</b>
+  <b style="color:#b5aea1">The gate doesn't advise. It decides — and blocks.</b>
 </div>
 """, unsafe_allow_html=True)
