@@ -705,13 +705,21 @@ def _ev_icon(sign: str) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 # LAYOUT
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown("## ⚡ Echo Decision Gate")
-st.markdown("### *If we block it, we assign it.*")
-st.markdown("Every blocked decision gets an owner and a next move — not just a warning.")
-
+st.markdown(
+    '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:4px">'
+    '<span style="font-family:Fraunces,serif;font-size:2rem;font-weight:500;color:#f4efe3;letter-spacing:-0.02em">⚡ Echo Decision Gate</span>'
+    '<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.75rem;color:#7a7367;letter-spacing:0.14em;text-transform:uppercase">v0.3 · preview</span>'
+    '</div>',
+    unsafe_allow_html=True,
+)
+st.markdown(
+    '<div style="font-family:Fraunces,serif;font-size:1.1rem;font-weight:300;color:#b5aea1;margin-bottom:18px;font-style:italic">'
+    'If we block it, we assign it.</div>',
+    unsafe_allow_html=True,
+)
 st.markdown(
     '<div class="hook">'
-    'Case 3: $20,000 loss from a procurement officer signing off on an engineering decision. '
+    '<b>Case 3:</b> $20,000 loss. Procurement signed off on an engineering decision. '
     'Not a data problem — an authority problem. '
     'HOLD wouldn\'t have caught it. <b>REDIRECT does.</b>'
     '</div>',
@@ -720,51 +728,10 @@ st.markdown(
 
 st.divider()
 
-# ── WHY THREE OUTCOMES ────────────────────────────────────────────────────────
-with st.expander("**Why ALLOW / HOLD / REDIRECT — not just pass/fail?**", expanded=False):
-    st.markdown("""
-The three outcomes map to three different **accountability destinations** — not just severity levels.
-
-| Outcome | Meaning | Who owns it |
-|---|---|---|
-| ✅ **ALLOW** | All rules passed. Execution authorized. | Gate system signs off |
-| 🛑 **HOLD** | Condition unmet or information missing. Submitter must resolve before retrying. | Submitter |
-| 🔀 **REDIRECT** | This person cannot make this decision — authority or expertise is elsewhere. Passing it through would itself be the violation. | Redirected party (e.g. Engineering, Legal) |
-
-**The critical distinction is HOLD vs REDIRECT.**
-
-HOLD = *not yet*. Fix the data, come back.
-
-REDIRECT = *not you*. No amount of data fixes it — the wrong person is deciding.
-Case 3 is the real example: procurement verbally confirmed a pin map and wrote "confirmed" in the spreadsheet.
-That's not HOLD (missing data) — that's a REDIRECT violation. Engineering must sign off. Procurement cannot substitute.
-The gap cost $20,000.
-
-Most advisory tools only have two states: warn or pass. They cannot model responsibility transfer.
-A system that can only say "be careful" cannot prevent Case 3.
-    """)
-
-st.divider()
-
-# flow diagram
-c1,c2,c3,c4,c5,c6,c7 = st.columns([2,.4,2,.4,2,.4,2])
-for col,label,body in [
-    (c1,"1 · input",    "Situation\nContract fields\nState flags"),
-    (c3,"2 · gate",     "Clause lookup\nRule scoring\nHigh-risk check"),
-    (c5,"3 · decision", "ALLOW / HOLD\nREDIRECT\nEvidence chain"),
-    (c7,"4 · lock",     "Button disabled\nif HOLD/REDIRECT\nAudit trace"),
-]:
-    col.markdown(f'<div class="step">{label}</div>', unsafe_allow_html=True)
-    col.markdown(body)
-for col in [c2,c4,c6]:
-    col.markdown('<div style="font-size:1.5rem;color:#7a7367;margin-top:20px;text-align:center">→</div>', unsafe_allow_html=True)
-
-st.divider()
-
 # case selector — default to Case 3 (REDIRECT, the novel state)
 _case_keys = list(DEMO_CASES.keys())
 _default_idx = next((i for i, k in enumerate(_case_keys) if "Case 3" in k), 0)
-selected = st.selectbox("**Load a demo case**", _case_keys, index=_default_idx)
+selected = st.selectbox("**Select a case**", _case_keys, index=_default_idx)
 cfg = DEMO_CASES[selected]
 
 if cfg is None:
@@ -803,7 +770,7 @@ with left:
         st.text_area("Draft", value=cfg["email_draft"], height=100, disabled=True, label_visibility="collapsed")
 
     # key state fields
-    skip = {"title","subtitle","domain","contract_clauses","gate_override","email_draft","incident","loss_amount"}
+    skip = {"title","subtitle","narrative","domain","contract_clauses","gate_override","email_draft","incident","loss_amount"}
     field_labels = {
         "dispute_type":"Dispute type","penalty_clause":"Penalty clause",
         "delivery_delay_days":"Delay (days)","penalty_rate_per_day":"Penalty rate/day",
@@ -1143,8 +1110,26 @@ with right:
 
 # ─────────────────────────────────────────────────────────────────────────────
 st.divider()
+
+with st.expander("**Why three outcomes — ALLOW / HOLD / REDIRECT?**", expanded=False):
+    st.markdown("""
+Most guardrails have two states: **pass** or **warn**. This gate has three — because the question isn't just *"is this safe?"* It's *"who has the authority to decide?"*
+
+| Outcome | Meaning | Owner |
+|---|---|---|
+| ✅ **ALLOW** | All rules passed. Proceed. | Gate signs off |
+| 🛑 **HOLD** | Condition unmet. Submitter can fix and retry. | Submitter |
+| 🔀 **REDIRECT** | Wrong person deciding. No amount of data changes that. | Redirected party |
+
+**HOLD vs REDIRECT is the key distinction.**
+
+HOLD = *not yet.* Fix the data, come back.
+
+REDIRECT = *not you.* The decision authority belongs elsewhere. Case 3 is the real example: procurement checked "confirmed" in a spreadsheet. That's not a data problem — that's an authority problem. HOLD wouldn't catch it. REDIRECT does. The gap cost $20,000.
+""")
+
 st.markdown("""
-<div style="font-size:0.78rem;color:#7a7367;text-align:center;font-family:'JetBrains Mono',monospace">
+<div style="font-size:0.78rem;color:#7a7367;text-align:center;font-family:'JetBrains Mono',monospace;margin-top:12px">
   Echo Decision Gate · rule engine + evidence chain + execution lock<br>
   Verticals: procurement · 4M manufacturing change control · contract enforcement · pre-send gate<br>
   <b style="color:#b5aea1">The gate doesn't advise. It decides — and blocks.</b>
