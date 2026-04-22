@@ -67,18 +67,18 @@ DEMO_CASES = {
         ],
         "gate_override": {
             "decision": "HOLD",
-            "owner": {"role": "구매 담당자", "action": "Fix — 조건부 수락 서한 작성 또는 waiver 요청", "why": "계약 조항 해소 권한은 제출자에게 있음 — 수정 후 재제출 가능"},
-            "user_verdict": "지금 수락하면 안 됩니다",
-            "user_verdict_sub": "계약서에 따르면 $10,000 청구권이 사라집니다",
+            "owner": {"role": "Procurement Officer", "action": "Fix — draft conditional acceptance letter or request waiver", "why": "Authority to resolve contract clauses rests with submitter — can resubmit after correction"},
+            "user_verdict": "You must not accept this right now",
+            "user_verdict_sub": "Per the contract, accepting now forfeits your $10,000 claim",
             "user_reason": (
-                "계약 4.2조에 따라 7일 초과 지연은 하루 $2,000 패널티가 발생합니다. "
-                "현재 12일 지연 = $10,000입니다. "
-                "그런데 지금 부분 납품을 수락하면, 서면 면제(waiver) 없이 수락한 것으로 간주되어 "
-                "이 $10,000 청구권을 포기하게 됩니다(6.1조). "
-                "8.3조에 따라 부분 납품 수락은 납품 완료로 인정되지 않으므로, "
-                "SLA 위반 시계는 계속 돌아갑니다."
+                "Under Clause 4.2, delays beyond 7 days incur a $2,000/day penalty. "
+                "Current delay is 12 days = $10,000. "
+                "Accepting partial delivery now would be treated as acceptance without a written waiver, "
+                "forfeiting this $10,000 claim (Clause 6.1). "
+                "Under Clause 8.3, acceptance of partial delivery does not count as full delivery completion, "
+                "so the SLA violation clock continues to run."
             ),
-            "user_action": "수락하기 전에 공급사로부터 서면 면제를 받거나, 부분 납품을 거절하고 $10,000 패널티 크레딧을 요청하세요.",
+            "user_action": "Obtain a written waiver from the supplier before accepting, or reject the partial delivery and request the $10,000 penalty credit.",
             "reason":   "Clause 4.2 — 12-day delay × $2,000/day = $10,000 exposure. Clause 6.1 — no waiver on record. Accepting partial shipment triggers Clause 8.3: full SLA clock restarts.",
             "unblock":  "Option A: obtain written waiver before accepting. Option B: reject partial, demand full delivery + penalty credit.",
             "financial_impact": "$10,000 unclaimed if accepted without waiver",
@@ -92,8 +92,8 @@ DEMO_CASES = {
             "confidence": 0.91,
             "risk": "high",
             "fix": {
-                "label":  "🔧 Fix it — 수정된 초안 생성",
-                "output_title": "수정된 수락 서한 (권리 보전)",
+                "label":  "🔧 Fix it — generate revised draft",
+                "output_title": "Revised Acceptance Letter (rights preserved)",
                 "output": (
                     "Subject: Conditional Acceptance of Partial Delivery — Without Prejudice\n\n"
                     "Dear [Supplier Contact],\n\n"
@@ -125,25 +125,25 @@ DEMO_CASES = {
                 ],
             },
             "route": {
-                "label":  "📤 Route — 담당자에게 넘기기",
-                "output_title": "법무팀 전달 메모",
+                "label":  "📤 Route — escalate to responsible party",
+                "output_title": "Legal Team Routing Memo",
                 "output": (
                     "To: Legal Team\n"
                     "From: Procurement\n"
-                    "Subject: [검토 요청] 부분 납품 수락 전 계약 검토\n\n"
+                    "Subject: [Review Request] Contract review before partial delivery acceptance\n\n"
                     "Issue:\n"
-                    "  공급사가 12일 지연 후 부분 납품을 제안했습니다.\n"
-                    "  수락 전 계약 조항 검토가 필요합니다.\n\n"
-                    "위반 위험 조항:\n"
-                    "  - Clause 4.2: 패널티 $10,000 발생 (12일 × $2,000)\n"
-                    "  - Clause 6.1: 서면 면제 없이 수락 시 청구권 소멸\n"
-                    "  - Clause 8.3: 부분 수락 ≠ 납품 완료\n\n"
-                    "재무 영향: $10,000 청구권 소멸 위험\n\n"
-                    "요청사항:\n"
-                    "  □ 서면 면제 수령 가능 여부 확인\n"
-                    "  □ 조건부 수락 문구 검토\n"
-                    "  □ 승인 후 회신\n\n"
-                    "판단 근거: Contract Gate (Clause 4.2, 6.1, 8.3) — 자동 차단됨"
+                    "  Supplier has offered partial delivery after a 12-day delay.\n"
+                    "  Contract clause review required before acceptance.\n\n"
+                    "At-risk clauses:\n"
+                    "  - Clause 4.2: $10,000 penalty accrued (12 days × $2,000)\n"
+                    "  - Clause 6.1: claim forfeited if accepted without written waiver\n"
+                    "  - Clause 8.3: partial acceptance ≠ full delivery completion\n\n"
+                    "Financial impact: risk of forfeiting $10,000 claim\n\n"
+                    "Requested actions:\n"
+                    "  □ Confirm whether written waiver can be obtained\n"
+                    "  □ Review conditional acceptance wording\n"
+                    "  □ Reply after approval\n\n"
+                    "Decision basis: Contract Gate (Clause 4.2, 6.1, 8.3) — auto-blocked"
                 ),
             },
         },
@@ -169,20 +169,20 @@ DEMO_CASES = {
         "gate_override": None,  # run real engine
         "user_verdict_live": {
             "ALLOW": {
-                "verdict":  "청구서를 발송해도 됩니다",
-                "sub":      "계약이 유효하고, 60일 초과 연체는 중대한 계약 위반입니다",
+                "verdict":  "You may issue the demand letter",
+                "sub":      "Contract is active and 60-day non-payment constitutes material breach",
                 "reason":   (
-                    "계약 3.2조에 따라 60일 이상 미지급은 중대한 계약 위반(material breach)에 해당합니다. "
-                    "계약은 현재 유효하고(3.1조), 연체 이자 청구권도 발생해 있습니다. "
-                    "9.1조에 따라 추가 통보 없이 납품 중단 및 회수 절차를 진행할 수 있습니다."
+                    "Under Clause 3.2, failure to pay for 60+ days constitutes material breach. "
+                    "The contract is currently active (Clause 3.1) and late payment interest has accrued. "
+                    "Under Clause 9.1, delivery suspension and recovery proceedings may be initiated without further notice."
                 ),
-                "action":   "공식 청구서(demand letter)를 발송하세요. 7일 내 무응답 시 9.1조에 따라 납품 중단 및 법적 회수 절차를 개시할 수 있습니다.",
+                "action":   "Issue the formal demand letter. If no response within 7 days, you may suspend delivery and initiate legal recovery under Clause 9.1.",
             },
             "HOLD": {
-                "verdict":  "추가 확인이 필요합니다",
-                "sub":      "청구 근거가 일부 불완전합니다",
-                "reason":   "계약 정보 또는 연체 내역이 충분하지 않아 청구 근거를 확정하기 어렵습니다. 계약서와 인보이스 내역을 보완하세요.",
-                "action":   "계약서 사본, 인보이스 발행일, 수령 확인 여부를 확인한 후 재제출하세요.",
+                "verdict":  "Additional verification required",
+                "sub":      "Claim basis is partially incomplete",
+                "reason":   "Contract information or payment overdue details are insufficient to confirm the claim basis. Supplement with the contract and invoice records.",
+                "action":   "Verify the contract copy, invoice issue date, and receipt confirmation, then resubmit.",
             },
         }
     },
@@ -207,16 +207,16 @@ DEMO_CASES = {
         ],
         "gate_override": {
             "decision": "REDIRECT_DEV",
-            "owner": {"role": "개발팀 (Engineering)", "action": "Route — 핀맵 검증 및 서명 필수", "why": "핀맵 검증은 개발 고유 권한 — 구매 서명으로 대체 불가 (HR-009)"},
-            "user_verdict": "개발팀이 직접 확인해야 합니다 — 지금 생산 진행 불가",
-            "user_verdict_sub": "구매팀의 '확인함' 기재는 이 절차를 대체할 수 없습니다",
+            "owner": {"role": "Engineering Team", "action": "Route — pin map verification and sign-off required", "why": "Pin map verification is exclusive to engineering — cannot be substituted by procurement sign-off (HR-009)"},
+            "user_verdict": "Engineering must verify directly — production cannot proceed now",
+            "user_verdict_sub": "Procurement's 'confirmed' entry cannot substitute this procedure",
             "user_reason": (
-                "부품을 교체할 때 핀맵(핀 배치)이 기존과 같은지 확인하는 것은 개발팀의 고유 업무입니다. "
-                "구매팀이 전화로 확인하거나 체크박스에 표시하는 것으로는 이 절차가 완료되지 않습니다. "
-                "실제로 이 구분이 지켜지지 않아 발생한 사고(INC-001)에서 부품 불일치로 $20,000의 재작업 비용이 발생했습니다. "
-                "데이터가 부족한 게 아니라, 검증 권한이 없는 사람이 승인한 것이 문제입니다."
+                "When replacing a component, verifying that the pin map (pin layout) matches the original is exclusively engineering's responsibility. "
+                "Procurement verbally confirming by phone or checking a checkbox does not complete this procedure. "
+                "In the actual incident (INC-001) where this distinction was not followed, a component mismatch caused $20,000 in rework costs. "
+                "The problem is not missing data — it is that someone without verification authority approved it."
             ),
-            "user_action": "개발팀에 핀맵 데이터시트 대조 검토를 요청하고, 개발팀 서명을 받은 후에 생산 라인에 투입하세요.",
+            "user_action": "Request engineering to cross-check the pin map datasheet, obtain engineering team sign-off, and only then proceed to production.",
             "reason":   "HR-009 — M1 replacement with unconfirmed pin map. Procurement verbal confirmation does not satisfy engineering sign-off requirement (INC-001 precedent).",
             "unblock":  "Engineering team must complete pin map datasheet cross-check and sign off before production release.",
             "financial_impact": "INC-001 precedent: identical gap → $20,000 rework",
@@ -237,54 +237,54 @@ DEMO_CASES = {
                 "REDIRECT forces the handoff to the only party qualified to sign off."
             ),
             "fix": {
-                "label":  "🔧 Fix it — 검토 요청 + 체크리스트 생성",
-                "output_title": "개발팀 검토 요청 (체크리스트 포함)",
+                "label":  "🔧 Fix it — generate review request + checklist",
+                "output_title": "Engineering Review Request (with checklist)",
                 "output": (
-                    "Subject: [긴급] 대체 부품 핀맵 검토 요청 — 생산 투입 전 필수\n\n"
-                    "개발팀,\n\n"
-                    "대체 IC 부품([부품번호]) 생산 투입 전 핀맵 검토 및 서명이 필요합니다.\n"
-                    "시스템이 차단 중입니다 (HR-009, INC-001 근거).\n\n"
-                    "■ 검토 체크리스트:\n"
-                    "  □ 기존 / 대체 부품 데이터시트 대조\n"
-                    "  □ 핀맵 1:1 확인 (VCC, GND, 신호핀)\n"
-                    "  □ 전기 특성 호환성 확인\n"
-                    "  □ 기능적 동등성 판단 (drop-in 여부)\n"
-                    "  □ 개발팀 담당자 서명: ___________\n\n"
-                    "서명 완료 후 시스템에 재제출하면 생산 잠금이 해제됩니다.\n\n"
-                    "참고: INC-001 — 동일 절차 미이행 시 $20,000 재작업 발생 (2026-04-22)\n\n"
-                    "[구매 담당자]"
+                    "Subject: [URGENT] Replacement Component Pin Map Review Required — Before Production\n\n"
+                    "Engineering Team,\n\n"
+                    "Pin map review and sign-off is required before replacement IC component ([part number]) enters production.\n"
+                    "System is currently blocking (basis: HR-009, INC-001).\n\n"
+                    "■ Review checklist:\n"
+                    "  □ Cross-check original / replacement component datasheets\n"
+                    "  □ Pin map 1:1 verification (VCC, GND, signal pins)\n"
+                    "  □ Electrical characteristic compatibility check\n"
+                    "  □ Functional equivalence determination (drop-in or not)\n"
+                    "  □ Engineering team sign-off: ___________\n\n"
+                    "After sign-off, resubmit to the system to release the production lock.\n\n"
+                    "Reference: INC-001 — same procedure skipped → $20,000 rework (2026-04-22)\n\n"
+                    "[Procurement Officer]"
                 ),
                 "diff": [
-                    ("del", "# 기존 프로세스: 구매팀 구두 확인 후 생산 투입"),
-                    ("add", "# 변경: 개발팀 서명 필수 (HR-009 적용)"),
+                    ("del", "# Previous process: procurement verbal confirmation then production"),
+                    ("add", "# Changed: engineering sign-off mandatory (HR-009 applied)"),
                     ("ctx", ""),
-                    ("del", "구매팀 확인: '공급사에 전화로 확인함' (체크박스)"),
-                    ("add", "개발팀 확인: 데이터시트 대조 + 서명 필수"),
+                    ("del", "Procurement confirmation: 'verified by phone with supplier' (checkbox)"),
+                    ("add", "Engineering confirmation: datasheet cross-check + sign-off required"),
                     ("ctx", ""),
-                    ("del", "→ 생산 투입 즉시 가능"),
-                    ("add", "→ 개발팀 서명 완료 후 시스템 재제출 → 잠금 해제"),
+                    ("del", "→ production can proceed immediately"),
+                    ("add", "→ resubmit to system after engineering sign-off → lock released"),
                     ("ctx", ""),
-                    ("ctx", "근거: INC-001 — 구두 확인만으로 투입 → $20,000 재작업"),
+                    ("ctx", "Basis: INC-001 — verbal confirmation only → $20,000 rework"),
                 ],
             },
             "route": {
-                "label":  "📤 Route — 개발팀장에게 넘기기",
-                "output_title": "개발팀장 에스컬레이션",
+                "label":  "📤 Route — escalate to Engineering Lead",
+                "output_title": "Engineering Lead Escalation",
                 "output": (
-                    "To: 개발팀장\n"
-                    "From: 구매팀\n"
-                    "Subject: [에스컬레이션] 대체 부품 핀맵 미확인 — 생산 차단 중\n\n"
+                    "To: Engineering Lead\n"
+                    "From: Procurement\n"
+                    "Subject: [Escalation] Replacement component pin map unconfirmed — production blocked\n\n"
                     "Issue:\n"
-                    "  대체 IC 부품([부품번호])의 핀맵이 개발팀에 의해 확인되지 않았습니다.\n"
-                    "  생산 라인 투입이 시스템에 의해 차단되어 있습니다.\n\n"
-                    "차단 근거:\n"
-                    "  - HR-009: M1 대체품 핀맵 확인은 개발팀 필수 서명 사항\n"
-                    "  - INC-001: 동일 절차 미이행 → $20,000 재작업 사고 (2026-04-22)\n\n"
-                    "현재 상황:\n"
-                    "  - 구매팀 구두 확인 기재 → 시스템 인정 불가\n"
-                    "  - 개발팀 데이터시트 대조 및 서명 필요\n\n"
-                    "요청: 개발 담당자 지정 및 검토 일정 확인 부탁드립니다.\n\n"
-                    "생산 대기 중 — 빠른 회신 부탁드립니다."
+                    "  The pin map of replacement IC component ([part number]) has not been confirmed by engineering.\n"
+                    "  Production line entry is blocked by the system.\n\n"
+                    "Block basis:\n"
+                    "  - HR-009: M1 replacement pin map confirmation is a mandatory engineering sign-off item\n"
+                    "  - INC-001: same procedure skipped → $20,000 rework incident (2026-04-22)\n\n"
+                    "Current status:\n"
+                    "  - Procurement verbal confirmation recorded → not accepted by system\n"
+                    "  - Engineering datasheet cross-check and sign-off required\n\n"
+                    "Request: Please assign an engineering contact and confirm the review schedule.\n\n"
+                    "Production on hold — prompt response appreciated."
                 ),
             },
         },
@@ -306,17 +306,17 @@ DEMO_CASES = {
         ),
         "gate_override": {
             "decision": "HOLD",
-            "owner": {"role": "작성자 또는 법무팀", "action": "Fix — 위험 표현 제거 후 재검토, 또는 법무팀 Route", "why": "표현 수정은 작성자가 가능 / 권리 포기 판단은 법무 필요"},
-            "user_verdict": "이 메일은 지금 보내면 안 됩니다",
-            "user_verdict_sub": "문장 두 개가 $10,000 청구권을 포기하는 것으로 해석될 수 있습니다",
+            "owner": {"role": "Author or Legal Team", "action": "Fix — remove risky language and revise, or Route to Legal", "why": "Author can revise wording / waiver judgment requires legal review"},
+            "user_verdict": "This email must not be sent right now",
+            "user_verdict_sub": "Two sentences may be interpreted as forfeiting your $10,000 claim",
             "user_reason": (
-                "'consider the matter closed'와 'no further claims' 표현은 법적으로 "
-                "권리 포기(waiver)로 해석될 수 있습니다. 계약 6.1조에는 서면 합의 없이는 "
-                "어떤 권리도 포기한 것으로 보지 않는다고 명시되어 있는데, 이 표현은 그 조항과 충돌합니다. "
-                "5.3조의 책임 상한($45,000)도 이 표현으로 인해 무력화될 위험이 있습니다. "
-                "내용 자체(부분 납품 수락)는 문제없지만, 표현 방식이 문제입니다."
+                "The phrases 'consider the matter closed' and 'no further claims' can be legally "
+                "interpreted as a waiver. Clause 6.1 of the contract states that no right shall be "
+                "deemed waived without written agreement — these phrases conflict with that clause. "
+                "The liability cap under Clause 5.3 ($45,000) also risks being undermined by this language. "
+                "The substance (accepting partial delivery) is fine — the wording is the problem."
             ),
-            "user_action": "해당 표현을 다음으로 교체하세요: 'Accepting partial delivery without prejudice to existing claims under Clause 4.2.'",
+            "user_action": "Replace that language with: 'Accepting partial delivery without prejudice to existing claims under Clause 4.2.'",
             "reason":   "Draft language 'consider the matter closed' + 'no further claims' creates implicit waiver risk (Clause 6.1). Contradicts liability cap (Clause 5.3). Sending as-is exposes $10,000 unclaimed penalty.",
             "unblock":  "Remove waiver language. Replace with: 'Accepting partial delivery without prejudice to existing claims under Clause 4.2.'",
             "financial_impact": "$10,000 penalty right forfeited if sent as-is",
@@ -330,8 +330,8 @@ DEMO_CASES = {
             "confidence": 0.88,
             "risk": "high",
             "fix": {
-                "label":  "🔧 Fix it — 안전한 초안으로 교체",
-                "output_title": "수정된 이메일 초안 (권리 보전)",
+                "label":  "🔧 Fix it — replace with safe draft",
+                "output_title": "Revised Email Draft (rights preserved)",
                 "output": (
                     "Subject: Partial Delivery Acceptance — Without Prejudice\n\n"
                     "Hi [Name],\n\n"
@@ -353,28 +353,28 @@ DEMO_CASES = {
                     ("del", "No further claims will be raised on our end."),
                     ("add", "Please confirm remaining delivery schedule."),
                     ("ctx", ""),
-                    ("ctx", "# Clause 6.1 위반 표현 제거 / Clause 5.3 위반 표현 제거"),
+                    ("ctx", "# Clause 6.1 violation language removed / Clause 5.3 violation language removed"),
                 ],
             },
             "route": {
-                "label":  "📤 Route — 법무팀에 넘기기",
-                "output_title": "법무팀 검토 요청",
+                "label":  "📤 Route — escalate to Legal Team",
+                "output_title": "Legal Team Review Request",
                 "output": (
                     "To: Legal Team\n"
-                    "From: [담당자]\n"
-                    "Subject: [검토 요청] 이메일 발송 전 계약 조항 충돌 확인\n\n"
+                    "From: [Contact]\n"
+                    "Subject: [Review Request] Contract clause conflict check before email send\n\n"
                     "Issue:\n"
-                    "  이메일 초안의 표현이 계약 조항과 충돌합니다.\n"
-                    "  시스템이 발송을 차단했습니다.\n\n"
-                    "충돌 조항:\n"
-                    "  - Clause 6.1: 'consider the matter closed' → 권리 포기로 해석\n"
-                    "  - Clause 5.3: 'no further claims' → 책임 상한 무력화\n"
-                    "  - Clause 7.2: 서면 동의 없는 조건 변경\n\n"
-                    "재무 영향: $10,000 패널티 청구권 소멸 위험\n\n"
-                    "요청:\n"
-                    "  □ 수정 표현 승인 또는 대안 제시\n"
-                    "  □ 발송 가능 여부 확인\n\n"
-                    "현재 발송 차단 중 — 승인 후 재제출 예정"
+                    "  The email draft contains language that conflicts with contract clauses.\n"
+                    "  System has blocked sending.\n\n"
+                    "Conflicting clauses:\n"
+                    "  - Clause 6.1: 'consider the matter closed' → interpreted as rights waiver\n"
+                    "  - Clause 5.3: 'no further claims' → undermines liability cap\n"
+                    "  - Clause 7.2: modification of obligations without written consent\n\n"
+                    "Financial impact: risk of forfeiting $10,000 penalty claim\n\n"
+                    "Requested actions:\n"
+                    "  □ Approve revised wording or provide alternative\n"
+                    "  □ Confirm whether sending is permissible\n\n"
+                    "Currently blocked — will resubmit after approval"
                 ),
             },
         },
@@ -653,8 +653,8 @@ with left:
 
 # ── RIGHT: RESULT ─────────────────────────────────────────────────────────────
 with right:
-    st.markdown("### 판단 결과")
-    with st.spinner("검토 중..."):
+    st.markdown("### Gate Result")
+    with st.spinner("Analyzing..."):
         result = run_gate(cfg)
 
     decision  = result["decision"]
@@ -667,7 +667,7 @@ with right:
     fin_impact= result["financial_impact"]
 
     override     = cfg.get("gate_override") or {}
-    # live engine cases: pick verdict by actual decision outcome
+    # live engine cases: pick verdict based on actual decision outcome
     _live_map = cfg.get("user_verdict_live", {})
     if _live_map and not override:
         _live = _live_map.get(decision, _live_map.get("HOLD", {}))
@@ -681,7 +681,7 @@ with right:
         user_reason  = override.get("user_reason")
         user_action  = override.get("user_action")
 
-    # ── 1. PRIMARY VERDICT: 사용자 언어 ──────────────────────────────────────
+    # ── 1. PRIMARY VERDICT: user language ──────────────────────────────────────
     if user_verdict:
         verdict_bg = {"HOLD":"#b71c1c","REDIRECT_DEV":"#4a148c","ALLOW":"#1b5e20"}.get(decision,"#333")
         sub_html = f'<div style="font-size:0.9rem;margin-top:6px;opacity:.85">{user_sub}</div>' if user_sub else ""
@@ -696,10 +696,10 @@ with right:
             unsafe_allow_html=True,
         )
 
-    # ── 1b. OWNER 배지 ───────────────────────────────────────────────────────
+    # ── 1b. OWNER badge ───────────────────────────────────────────────────────
     _owner_cfg = override.get("owner")
     if not _owner_cfg and decision == "ALLOW":
-        _owner_cfg = {"role": "시스템 승인", "action": "게이트 통과 — 실행 가능"}
+        _owner_cfg = {"role": "System Approved", "action": "Gate passed — execution authorized"}
     if _owner_cfg:
         _owner_color = {
             "HOLD":        "#7f0000",
@@ -710,7 +710,7 @@ with right:
         _owner_why = _owner_cfg.get("why", "")
         _why_html = (
             f'<div style="font-size:0.78rem;color:#888;margin-top:4px;padding-left:2px">'
-            f'왜 이 사람인가: {_owner_why}</div>'
+            f'Why this owner: {_owner_why}</div>'
             if _owner_why else ""
         )
         st.markdown(
@@ -726,48 +726,48 @@ with right:
 
     st.markdown("")
 
-    # ── 2. 이유 (사용자 언어 우선) ───────────────────────────────────────────
+    # ── 2. Reason (user language preferred) ───────────────────────────────────────
     if user_reason:
         st.markdown(user_reason)
     else:
         st.markdown(f"**{reason}**")
 
-    # ── 3. 재무 영향 ─────────────────────────────────────────────────────────
+    # ── 3. Financial impact ─────────────────────────────────────────────────────────
     if fin_impact:
         st.markdown(
-            f'<div class="impact-box">💰 재무 영향: <b>{fin_impact}</b></div>',
+            f'<div class="impact-box">💰 Financial impact: <b>{fin_impact}</b></div>',
             unsafe_allow_html=True,
         )
 
-    # ── 4. 지금 해야 할 일 ───────────────────────────────────────────────────
+    # ── 4. Next Action ───────────────────────────────────────────────────
     display_action = user_action or unblock
     if display_action:
-        st.info(f"**지금 해야 할 일:** {display_action}")
+        st.info(f"**Next Action:** {display_action}")
 
     st.divider()
 
-    # ── 5. 실행 잠금 — Streamlit native button (진짜로 클릭 안 됨) ───────────
-    action_label = cfg.get("action_label", "✅  실행")
+    # ── 5. Execution lock — Streamlit native button (truly unclickable) ───────────
+    action_label = cfg.get("action_label", "✅  Execute")
     block_rule   = override.get("reason", reason)[:80] if locked else ""
 
-    # BLOCKED 케이스: 버튼은 disabled + 클릭 시 차단 메시지 (st.button은 disabled=True면 이벤트 자체 없음)
-    # ALLOW 케이스: 버튼 활성화, 클릭 시 성공 팝업
+    # BLOCKED case: button disabled + block message on click (st.button with disabled=True fires no events)
+    # ALLOW case: button active, click shows success popup
 
-    st.markdown("**실행**")
+    st.markdown("**Execute**")
 
     if locked:
-        # disabled=True → Streamlit이 실제로 클릭 불가 처리
+        # disabled=True → Streamlit actually prevents clicking
         st.button(
             f"🔒  {action_label.lstrip('✅📨🏭📤 ')} — Blocked by Contract Gate",
             disabled=True,
             use_container_width=True,
-            help=f"차단 근거: {block_rule}",
+            help=f"Block basis: {block_rule}",
         )
         st.markdown(
             f'<div style="background:#b71c1c22;border:1px solid #b71c1c55;border-radius:6px;'
             f'padding:10px 14px;margin-top:6px;font-size:0.88rem">'
             f'🚫 <b>Execution blocked by policy</b><br>'
-            f'<span style="color:#555">근거: {override.get("reason", reason)[:120]}...</span>'
+            f'<span style="color:#555">Basis: {override.get("reason", reason)[:120]}...</span>'
             f'</div>',
             unsafe_allow_html=True,
         )
@@ -779,17 +779,17 @@ with right:
         )
         if _clicked:
             st.success(
-                f"✅ **실행 승인됨** — 게이트 통과. 감사 기록이 저장되었습니다.\n\n"
-                f"신뢰도 {int(conf*100)}% | 위험도 {risk.upper()} | 결정: ALLOW"
+                f"✅ **Execution authorized** — Gate passed. Audit record saved.\n\n"
+                f"Confidence {int(conf*100)}% | Risk {risk.upper()} | Decision: ALLOW"
             )
 
-    # ── 6. Fix / Route (BLOCKED일 때만) ─────────────────────────────────────
+    # ── 6. Fix / Route (only when BLOCKED) ─────────────────────────────────────
     fix_action   = override.get("fix")
     route_action = override.get("route")
 
     if locked and (fix_action or route_action):
         st.divider()
-        st.markdown("**다음 중 하나를 선택하세요**")
+        st.markdown("**Choose one of the following**")
         col_fix, col_route = st.columns(2)
 
         show_fix   = st.session_state.get(f"show_fix_{selected}", False)
@@ -825,15 +825,15 @@ with right:
             )
             st.markdown(
                 f'<a href="{_mailto_fix}" target="_blank" style="{_btn_style}background:#1565c0;color:#fff">✉️ Draft Email — Ready to Send</a>'
-                f'<span style="font-size:0.78rem;color:#888">← 내용 pre-filled · 검토 후 발송</span>',
+                f'<span style="font-size:0.78rem;color:#888">← content pre-filled · review before sending</span>',
                 unsafe_allow_html=True,
             )
             st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
 
-            # diff — 항상 펼쳐짐
+            # diff — always expanded
             diff_lines = fix_action.get("diff", [])
             if diff_lines:
-                with st.expander("변경 사항 (before / after)", expanded=True):
+                with st.expander("Changes (before / after)", expanded=True):
                     diff_colors = {"add": "#1b5e20", "del": "#b71c1c", "ctx": "#555"}
                     diff_bg     = {"add": "#f1f8f1", "del": "#fdf1f1", "ctx": "#fafafa"}
                     diff_prefix = {"add": "+ ", "del": "- ", "ctx": "  "}
@@ -866,14 +866,14 @@ with right:
             )
             st.markdown(
                 f'<a href="{_mailto_route}" target="_blank" style="{_btn_style}background:#4a148c;color:#fff">✉️ Prepare Handoff Email</a>'
-                f'<span style="font-size:0.78rem;color:#888">← 수신인 + 내용 pre-filled · 검토 후 발송</span>',
+                f'<span style="font-size:0.78rem;color:#888">← recipient + content pre-filled · review before sending</span>',
                 unsafe_allow_html=True,
             )
 
     st.divider()
 
-    # ── 7. 내부 판단 근거 (개발자/HN용 접이식) ──────────────────────────────
-    with st.expander("🔧 내부 판단 근거 보기 (엔진 / 증거 체인)", expanded=False):
+    # ── 7. Internal reasoning (collapsible for developers/HN) ──────────────────────────────
+    with st.expander("🔧 View Internal Reasoning (Engine / Evidence Chain)", expanded=False):
         st.markdown(
             '<div style="background:#e8eaf6;border-left:3px solid #3949ab;padding:7px 12px;'
             'border-radius:0 4px 4px 0;font-size:0.82rem;margin-bottom:12px">'
@@ -882,8 +882,8 @@ with right:
             '</div>',
             unsafe_allow_html=True,
         )
-        st.markdown(f"**내부 결정 코드:** `{decision}`")
-        st.progress(conf, text=f"신뢰도: {int(conf*100)}%  |  위험도: {risk.upper()}")
+        st.markdown(f"**Internal decision code:** `{decision}`")
+        st.progress(conf, text=f"Confidence: {int(conf*100)}%  |  Risk: {risk.upper()}")
         st.markdown("")
 
         _case_why = override.get("decision_why")
