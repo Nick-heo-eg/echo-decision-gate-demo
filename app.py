@@ -1133,5 +1133,11 @@ st.markdown("""
   Echo Decision Gate · rule engine + evidence chain + execution lock<br>
   Verticals: procurement · 4M manufacturing change control · contract enforcement · pre-send gate<br>
   <b style="color:#b5aea1">The gate doesn't advise. It decides — and blocks.</b>
+  <br><br>
+  <span style="color:#3a342c">──────────────────────────────────────────</span><br>
+  <span style="color:#7a7367">
+  Demo note: contract clauses shown here are pre-defined for illustration.<br>
+  In production, a contract PDF is uploaded → clauses are auto-parsed → mapped to gate rules.
+  </span>
 </div>
 """, unsafe_allow_html=True)
