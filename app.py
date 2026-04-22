@@ -4,7 +4,7 @@ Echo Decision Gate — Public Demo
 
 Run: streamlit run app.py
 """
-import sys, json, uuid
+import sys, json
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -166,25 +166,30 @@ DEMO_CASES = {
             ("3.2", "Default",       "Failure to pay within 60 days constitutes material breach."),
             ("9.1", "Remedies",      "Supplier may suspend delivery and pursue recovery without further notice."),
         ],
-        "gate_override": None,  # run real engine
-        "user_verdict_live": {
-            "ALLOW": {
-                "verdict":  "청구서를 발송해도 됩니다",
-                "sub":      "계약이 유효하고, 60일 초과 연체는 중대한 계약 위반입니다",
-                "reason":   (
-                    "계약 3.2조에 따라 60일 이상 미지급은 중대한 계약 위반(material breach)에 해당합니다. "
-                    "계약은 현재 유효하고(3.1조), 연체 이자 청구권도 발생해 있습니다. "
-                    "9.1조에 따라 추가 통보 없이 납품 중단 및 회수 절차를 진행할 수 있습니다."
-                ),
-                "action":   "공식 청구서(demand letter)를 발송하세요. 7일 내 무응답 시 9.1조에 따라 납품 중단 및 법적 회수 절차를 개시할 수 있습니다.",
-            },
-            "HOLD": {
-                "verdict":  "추가 확인이 필요합니다",
-                "sub":      "청구 근거가 일부 불완전합니다",
-                "reason":   "계약 정보 또는 연체 내역이 충분하지 않아 청구 근거를 확정하기 어렵습니다. 계약서와 인보이스 내역을 보완하세요.",
-                "action":   "계약서 사본, 인보이스 발행일, 수령 확인 여부를 확인한 후 재제출하세요.",
-            },
-        }
+        "gate_override": {
+            "decision": "ALLOW",
+            "owner": {"role": "시스템 승인", "action": "Gate passed — proceed to execution"},
+            "user_verdict": "청구서를 발송해도 됩니다",
+            "user_verdict_sub": "계약이 유효하고, 60일 초과 연체는 중대한 계약 위반입니다",
+            "user_reason": (
+                "계약 3.2조에 따라 60일 이상 미지급은 중대한 계약 위반(material breach)에 해당합니다. "
+                "계약은 현재 유효하고(3.1조), 연체 이자 청구권도 발생해 있습니다. "
+                "9.1조에 따라 추가 통보 없이 납품 중단 및 회수 절차를 진행할 수 있습니다."
+            ),
+            "user_action": "공식 청구서(demand letter)를 발송하세요. 7일 내 무응답 시 9.1조에 따라 납품 중단 및 법적 회수 절차를 개시할 수 있습니다.",
+            "reason": "Clause 3.2 — 60+ days overdue = material breach. Contract active (3.1). Recovery rights confirmed (9.1).",
+            "unblock": "",
+            "financial_impact": "$45,000 overdue + 1.5%/month interest accruing",
+            "execution_locked": False,
+            "evidence": [
+                ("pos", "Clause 3.1 — contract active, payment terms confirmed", "ALLOW signal"),
+                ("pos", "Clause 3.2 — 60-day threshold exceeded: material breach", "ALLOW signal"),
+                ("pos", "Clause 9.1 — recovery rights active, no further notice needed", "ALLOW signal"),
+                ("neutral", "No dispute raised by buyer — uncontested claim", "advisory"),
+            ],
+            "confidence": 0.93,
+            "risk": "low",
+        },
     },
 
     "🔀 Case 3 — Component swap: pin map unconfirmed → execution blocked": {
@@ -386,135 +391,18 @@ DEMO_CASES = {
 # GATE ENGINE
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _run_procurement_engine(cfg: dict) -> dict:
-    try:
-        from verticals.procurement.schema import ProcurementCase
-        from verticals.procurement.rule_extractor import evaluate
-        from verticals.procurement.judgment_adapter import _confidence_to_float, _risk_from_procurement
-
-        pc = ProcurementCase(
-            case_id             = str(uuid.uuid4()),
-            raw_description     = cfg.get("subtitle", ""),
-            dispute_type        = cfg.get("dispute_type", "unknown"),
-            supplier_id         = cfg.get("supplier_id"),
-            penalty_clause      = cfg.get("penalty_clause"),
-            delivery_delay_days = cfg.get("delivery_delay_days"),
-            contract_value      = cfg.get("contract_value"),
-            payment_overdue     = cfg.get("payment_overdue"),
-            contract_active     = cfg.get("contract_active"),
-            single_source       = cfg.get("single_source"),
-            alt_supplier_ready  = cfg.get("alt_supplier_ready"),
-            urgency             = cfg.get("urgency"),
-            supply_risk         = cfg.get("supply_risk"),
-        )
-        r = evaluate(pc)
-
-        decision = "ALLOW" if r.status == "ALLOW" else "HOLD"
-        risk_d   = {"supply_risk": cfg.get("supply_risk","medium"), "win_prob_pct": r.win_prob_pct}
-
-        reason_parts = [r.conclusion or ""]
-        if r.reasoning:
-            reason_parts.append(str(r.reasoning[0]))
-        reason = " | ".join(p for p in reason_parts if p)[:300]
-
-        unblock = ""
-        if r.hold_reasons:
-            h = r.hold_reasons[0]
-            unblock = h.get("resume","") if isinstance(h, dict) else str(h)
-        elif decision == "ALLOW" and r.actions:
-            unblock = str(r.actions[0])
-
-        evidence_raw = [
-            (("pos" if ev.effect > 0 else "neg"), ev.reason, f"{'+' if ev.effect>0 else ''}{ev.effect:.3f}")
-            for ev in (r.evidence_layer or [])[:5]
-        ]
-
-        return {
-            "decision": decision,
-            "reason":   reason,
-            "unblock":  unblock,
-            "financial_impact": None,
-            "execution_locked": decision == "HOLD",
-            "evidence": evidence_raw,
-            "confidence": _confidence_to_float(r.confidence),
-            "risk":       _risk_from_procurement(risk_d),
-        }
-    except Exception as e:
-        return {
-            "decision": "HOLD",
-            "reason":   f"Engine error — fail-closed. ({e})",
-            "unblock":  "Check input fields and retry.",
-            "financial_impact": None,
-            "execution_locked": True,
-            "evidence": [("neg", str(e)[:100], "error")],
-            "confidence": 0.0,
-            "risk": "high",
-        }
-
-
-def _run_fourm_engine(cfg: dict) -> dict:
-    try:
-        from verticals.fourm.judgment_adapter import run_judgment
-        case = {
-            "id":    str(uuid.uuid4()),
-            "domain": "fourm",
-            "raw":    cfg.get("subtitle", ""),
-            "scope": {
-                "fourm_type":        cfg.get("fourm_type", "M1_material"),
-                "pin_map_changed":   cfg.get("pin_map_changed", "UNKNOWN"),
-                "functional_change": cfg.get("functional_change", "UNKNOWN"),
-                "phase":             cfg.get("phase", "MP"),
-                "product_type":      cfg.get("product_type", "EXISTING"),
-                "comp_type":         cfg.get("component_type", "logic"),
-            },
-            "fields": {},
-        }
-        r = run_judgment(case)
-        decision = r.get("decision", "HOLD")
-        evidence_raw = []
-        for ev in (r.get("evidence") or [])[:5]:
-            if isinstance(ev, dict):
-                eff = ev.get("effect", 0)
-                evidence_raw.append(
-                    ("pos" if eff > 0 else "neg", ev.get("reason", ev.get("rule_id","")), f"{'+' if eff>0 else ''}{eff:.3f}")
-                )
-        return {
-            "decision": decision,
-            "reason":   r.get("reason",""),
-            "unblock":  r.get("unblock_action",""),
-            "financial_impact": None,
-            "execution_locked": decision not in ("ALLOW","CONDITIONAL_ALLOW"),
-            "evidence": evidence_raw,
-            "confidence": r.get("confidence", 0.5),
-            "risk":       r.get("risk","high"),
-        }
-    except Exception as e:
-        return {
-            "decision": "HOLD", "reason": f"Engine error ({e})", "unblock": "",
-            "financial_impact": None, "execution_locked": True,
-            "evidence": [("neg", str(e)[:100], "error")], "confidence":0.0, "risk":"high",
-        }
-
-
 def run_gate(cfg: dict) -> dict:
-    override = cfg.get("gate_override")
-    if override is not None:
-        ev = override.get("evidence", [])
-        return {
-            "decision":         override["decision"],
-            "reason":           override["reason"],
-            "unblock":          override.get("unblock",""),
-            "financial_impact": override.get("financial_impact"),
-            "execution_locked": override.get("execution_locked", False),
-            "evidence":         ev,
-            "confidence":       override.get("confidence", 0.8),
-            "risk":             override.get("risk","high"),
-        }
-    # live engine
-    domain = cfg.get("domain","procurement")
-    if domain == "fourm":
-        return _run_fourm_engine(cfg)
-    return _run_procurement_engine(cfg)
+    override = cfg.get("gate_override", {})
+    return {
+        "decision":         override["decision"],
+        "reason":           override["reason"],
+        "unblock":          override.get("unblock", ""),
+        "financial_impact": override.get("financial_impact"),
+        "execution_locked": override.get("execution_locked", False),
+        "evidence":         override.get("evidence", []),
+        "confidence":       override.get("confidence", 0.8),
+        "risk":             override.get("risk", "high"),
+    }
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -664,19 +552,10 @@ with right:
     fin_impact= result["financial_impact"]
 
     override     = cfg.get("gate_override") or {}
-    # live engine cases: pick verdict by actual decision outcome
-    _live_map = cfg.get("user_verdict_live", {})
-    if _live_map and not override:
-        _live = _live_map.get(decision, _live_map.get("HOLD", {}))
-        user_verdict = _live.get("verdict")
-        user_sub     = _live.get("sub")
-        user_reason  = _live.get("reason")
-        user_action  = _live.get("action")
-    else:
-        user_verdict = override.get("user_verdict")
-        user_sub     = override.get("user_verdict_sub")
-        user_reason  = override.get("user_reason")
-        user_action  = override.get("user_action")
+    user_verdict = override.get("user_verdict")
+    user_sub     = override.get("user_verdict_sub")
+    user_reason  = override.get("user_reason")
+    user_action  = override.get("user_action")
 
     # ── 1. PRIMARY VERDICT: 사용자 언어 ──────────────────────────────────────
     if user_verdict:
