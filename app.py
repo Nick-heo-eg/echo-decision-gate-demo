@@ -373,7 +373,7 @@ DEMO_CASES = {
         ],
         "gate_override": {
             "decision": "REDIRECT_DEV",
-            "owner": {"role": "Engineering Team", "action": "Route — pin map verification and sign-off required", "why": "Pin map verification is exclusive to engineering — cannot be substituted by procurement sign-off (HR-009)"},
+            "owner": {"role": "Engineering Team", "action": "Route — pin map verification and sign-off required", "why": "Pin map verification is exclusive to engineering — procurement sign-off does not transfer this authority."},
             "user_verdict": "Engineering must verify directly — production cannot proceed now",
             "user_verdict_sub": "Procurement's 'confirmed' entry cannot substitute this procedure",
             "user_reason": (
@@ -383,13 +383,13 @@ DEMO_CASES = {
                 "The problem is not missing data — it is that someone without verification authority approved it."
             ),
             "user_action": "Request engineering to cross-check the pin map datasheet, obtain engineering team sign-off, and only then proceed to production.",
-            "reason":   "HR-009 — M1 replacement with unconfirmed pin map. Procurement verbal confirmation does not satisfy engineering sign-off requirement (INC-001 precedent).",
+            "reason":   "M1 replacement with unconfirmed pin map. Procurement verbal confirmation does not satisfy engineering sign-off requirement.",
             "unblock":  "Engineering team must complete pin map datasheet cross-check and sign off before production release.",
             "financial_impact": "INC-001 precedent: identical gap → $20,000 rework",
             "execution_locked": True,
             "evidence": [
                 ("neg",     "M1 replacement: pin_map_changed = UNKNOWN (not NO = still HOLD)",           "REDIRECT trigger"),
-                ("neg",     "HR-009 — engineering sign-off mandatory, cannot be waived by procurement",  "hard rule"),
+                ("neg",     "Engineering sign-off mandatory — cannot be waived by procurement",           "hard rule"),
                 ("neg",     "INC-001 — prior incident: identical gap cost $20k",                         "precedent"),
                 ("neutral", "Phase: MP (mass production) — zero tolerance for unverified component swap","context"),
             ],
@@ -409,7 +409,7 @@ DEMO_CASES = {
                     "Subject: [URGENT] Replacement Component Pin Map Review Required — Before Production\n\n"
                     "Engineering Team,\n\n"
                     "Pin map review and sign-off is required before replacement IC component ([part number]) enters production.\n"
-                    "System is currently blocking (basis: HR-009, INC-001).\n\n"
+                    "System is currently blocking — engineering sign-off not on record.\n\n"
                     "■ Review checklist:\n"
                     "  □ Cross-check original / replacement component datasheets\n"
                     "  □ Pin map 1:1 verification (VCC, GND, signal pins)\n"
@@ -422,7 +422,7 @@ DEMO_CASES = {
                 ),
                 "diff": [
                     ("del", "# Previous process: procurement verbal confirmation then production"),
-                    ("add", "# Changed: engineering sign-off mandatory (HR-009 applied)"),
+                    ("add", "# Changed: engineering sign-off mandatory — procurement cannot substitute"),
                     ("ctx", ""),
                     ("del", "Procurement confirmation: 'verified by phone with supplier' (checkbox)"),
                     ("add", "Engineering confirmation: datasheet cross-check + sign-off required"),
@@ -444,7 +444,7 @@ DEMO_CASES = {
                     "  The pin map of replacement IC component ([part number]) has not been confirmed by engineering.\n"
                     "  Production line entry is blocked by the system.\n\n"
                     "Block basis:\n"
-                    "  - HR-009: M1 replacement pin map confirmation is a mandatory engineering sign-off item\n"
+                    "  - M1 replacement: pin map confirmation is a mandatory engineering sign-off item\n"
                     "  - INC-001: same procedure skipped → $20,000 rework incident (2026-04-22)\n\n"
                     "Current status:\n"
                     "  - Procurement verbal confirmation recorded → not accepted by system\n"
